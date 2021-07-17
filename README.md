@@ -1,11 +1,9 @@
 # Homebridge grifs
-[![Downloads](https://img.shields.io/github/downloads/lynxcs/homebridge-grifs/total)]
 
 ## Homebridge plugin for Grifs AG
 
 ### Introduction
 This homebridge plugin exposes alarm status as an alarm accessory
-
 The only feature that is currently supported is getting the status of the alarm (Armed or disarmed)
 
 ### Prerequisites
