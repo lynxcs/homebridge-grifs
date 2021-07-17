@@ -1,0 +1,22 @@
+{
+	"name": "homebridge-grifs",
+	"version": "1.0.0",
+	"description": "Homebridge plugin to display status of grifs alarm system",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Domas Kalinauskas",
+	"license": "ISC",
+	"keywords": [
+		"homebridge-plugin",
+		"homekit",
+		"alarm"
+	],
+	"dependencies": {
+		"shelljs": "^0.8.1"
+	},
+	"engines": {
+		"homebridge": ">=0.2.0"
+	}
+}

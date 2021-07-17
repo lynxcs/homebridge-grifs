@@ -1,0 +1,37 @@
+#!/bin/bash
+# homebridge-grifs
+# Domas Kalinauskas 2021
+
+# Modify these 2 variables!
+EMAIL=NULL
+PASSWORD=NULL
+
+if [[ "$EMAIL" = "NULL" ]]; then
+	echo "Email not set!"
+	exit
+fi
+if [[ "$PASSWORD" = "NULL" ]]; then
+	echo "Password not set!"
+	exit
+fi
+
+#Get the _token value
+echo "--- Querying alarm status ---"
+curl -silent -c /tmp/loginCookie https://www.saugierdve.lt/login &> /tmp/out.log1
+_token=$(cat /tmp/out.log1 | grep '_token' | grep -o 'value=.*' | grep -o '".*"')
+_token="${_token%\"}"
+_token="${_token#\"}"
+# echo $_token
+
+curl -L --form _token=$_token --form email=$EMAIL --form password=$PASSWORD --form language=en -b /tmp/loginCookie -D /tmp/followupCookie https://www.saugierdve.lt/login &> /tmp/out.log2
+curl -L -b /tmp/followupCookie -silent https://saugierdve.lt/system/view/318/areas > /tmp/out.log3
+_response=$(cat /tmp/out.log3 | grep 'area_388_status_name')
+#if [[ "$_response" = *"&scaron;"* ]]; then
+if [[ "$_response" = *Dis* ]]; then
+    echo "disabled" > /tmp/alarmStatus
+    echo "--- Alarm - disabled"
+else
+    echo "enabled" > /tmp/alarmStatus
+    echo "--- Alarm - enabled"
+fi
+
