@@ -4,10 +4,12 @@
 
 ### Introduction
 This homebridge plugin exposes alarm status as an alarm accessory
+
 The only feature that is currently supported is getting the status of the alarm (Armed or disarmed)
 
 ### Prerequisites
 Homebridge server should be running Linux, as currently only that is supported by this plugin
+
 The Grifs AG [website](https://saugierdve.lt) has to have its language set to English
 
 ### Installation
