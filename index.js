@@ -76,7 +76,8 @@ GRIFHomeAlarm.prototype =
 				if (alarmStatus != readStatus())
 				{
 					logger.info("Alarm status changed!");
-					alarmService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(readStatus());
+					alarmStatus = readStatus();
+					alarmService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(alarmStatus);
 				}
 			});
 
@@ -92,7 +93,8 @@ GRIFHomeAlarm.prototype =
 				if (alarmStatus != readStatus())
 				{
 					logger.info("Alarm status changed!");
-					alarmService.getCharacteristic(Characteristic.On).updateValue(readStatus());
+					alarmStatus = readStatus();
+					alarmService.getCharacteristic(Characteristic.On).updateValue(alarmStatus);
 				}
 			});
 
@@ -118,8 +120,9 @@ GRIFHomeAlarm.prototype =
 				if (alarmStatus != readStatus())
 				{
 					logger.info("Alarm status changed!");
-					alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(readStatus());
-					alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(readStatus());
+					alarmStatus = readStatus();
+					alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(alarmStatus);
+					alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(alarmStatus);
 				}
 			});
 
