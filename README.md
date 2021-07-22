@@ -26,10 +26,11 @@ $ sudo npm -g i homebridge-grifs
         "name": "Home Alarm",
         "type": "Alarm",
         "email": "email@example.com",
-        "password": "password
+        "password": "password",
+        "interval": 3
     }
 ]
 ```
-where `name` is the alarm name; `type` is "Alarm" (Security System), "Switch" (Switch) or "Sensor" (Occupancy Sensor); `email` is email address of the Grifs website account; `password` is the password of the account.
+where `name` is the alarm name; `type` is "Alarm" (Security System), "Switch" (Switch) or "Sensor" (Occupancy Sensor); `email` and `password` are the login details; `interval` is an optional parameter, setting how often (in minutes) to query the alarm status, default is 3 minutes.
 #### Getting help
 If you need help troubleshooting, create an issue and I'll try to help you fix it.

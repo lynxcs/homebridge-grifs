@@ -5,7 +5,7 @@ var execScript = require('child_process').exec;
 var logger;
 // ContactSensor
 var Service, Characteristic;
-var Email, Password, Type;
+var Email, Password, Type, Interval;
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
@@ -43,8 +43,14 @@ function GRIFHomeAlarm(log, config) {
 	Email = config["email"];
 	Password = config["password"];
 	Type = config["type"];
+	Interval = config["interval"];
+
 	if (Type == undefined) {
 		Type = "Switch";
+	}
+	
+	if (Interval == undefined) {
+		Interval = 3;
 	}
 
 	// Create alarmStatus file in case it doesn't exist
@@ -56,7 +62,7 @@ function GRIFHomeAlarm(log, config) {
 	queryWebsite();
 	setInterval(function () {
 		queryWebsite();
-	}, 3 * 60 * 1000);
+	}, Interval * 60 * 1000);
 
 }
 

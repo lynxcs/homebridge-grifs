@@ -1,12 +1,16 @@
 {
 	"name": "homebridge-grifs",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Homebridge plugin to display status of grifs alarm system",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Domas Kalinauskas",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lynxcs/homebridge-grifs.git"
+	},
 	"license": "ISC",
 	"keywords": [
 		"homebridge-plugin",
