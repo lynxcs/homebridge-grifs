@@ -1,6 +1,6 @@
 {
 	"name": "homebridge-grifs",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Homebridge plugin to display status of grifs alarm system",
 	"main": "index.js",
 	"scripts": {
@@ -14,7 +14,7 @@
 		"alarm"
 	],
 	"dependencies": {
-		"shelljs": "^0.8.1"
+		"shelljs": "^0.8.4"
 	},
 	"engines": {
 		"homebridge": ">=0.2.0"

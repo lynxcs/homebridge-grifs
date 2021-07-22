@@ -1,5 +1,0 @@
-#!/bin/bash
-# homebridge-grifs
-# Domas Kalinauskas 2021
-
-cat /tmp/alarmStatus

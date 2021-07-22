@@ -3,9 +3,11 @@
 # Domas Kalinauskas 2021
 
 # Modify these 2 variables!
-EMAIL=NULL
-PASSWORD=NULL
+EMAIL=$1
+PASSWORD=$2
 
+echo "Email: $EMAIL"
+echo "Password: $PASSWORD"
 if [[ "$EMAIL" = "NULL" ]]; then
 	echo "Email not set!"
 	exit

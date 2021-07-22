@@ -1,66 +1,153 @@
 // homebridge-grifs
 // Domas Kalinauskas 2021
-var shell = require('shelljs');
+var fs = require('fs');
+var execScript = require('child_process').exec;
+var logger;
 // ContactSensor
 var Service, Characteristic;
-var path_to_login_script;
+var Email, Password, Type;
 module.exports = function (homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
 	homebridge.registerAccessory("homebridge-grifs", "GRIFHomeAlarm", GRIFHomeAlarm);
 };
 
-function GRIFHomeAlarm(log, config) {
-	this.log = log;
-	this.name = config["name"];
-	path_to_login_script = config["path"];
+function readStatus() {
+	if (fs.readFileSync('/tmp/alarmStatus').includes('dis')) {
+		if (Type == "Alarm") {
+			return 3;
+		}
+		else {
+			return 0;
+		}
+	}
+	else {
+		return 1;
+	}
 }
 
-GRIFHomeAlarm.prototype = {
+function queryWebsite() {
+	if (Email != undefined && Password != undefined) {
+		var previousStatus = readStatus();
+		execScript('nohup sh -c \'' + __dirname + '/grif_status "' + Email + '" "' + Password + '" &\' &');
+	}
+	else {
+		logger.error("Configuration error: email and password not set!");
+	}
+}
 
+function GRIFHomeAlarm(log, config) {
+	this.log = log;
+	logger = log;
+	this.name = config["name"];
+	Email = config["email"];
+	Password = config["password"];
+	Type = config["type"];
+	if (Type == undefined) {
+		Type = "Switch";
+	}
+
+	// Create alarmStatus file in case it doesn't exist
+	execScript('touch /tmp/alarmStatus');
+
+	// Make script executable in case it isn't yet
+	execScript('chmod a+x ' + __dirname + '/grif_status');
+
+	queryWebsite();
+	setInterval(function () {
+		queryWebsite();
+	}, 3 * 60 * 1000);
+
+}
+
+GRIFHomeAlarm.prototype =
+{
 	getServices: function () {
-		var me = this;
 		var informationService = new Service.AccessoryInformation();
 		informationService
 			.setCharacteristic(Characteristic.Manufacturer, "Grif")
 			.setCharacteristic(Characteristic.Model, "Grif")
 			.setCharacteristic(Characteristic.SerialNumber, "123-456-789");
-		var status_actual = 0;
-		var alarmService = new Service.SecuritySystem("Alarm");
-		alarmService
-			.getCharacteristic(Characteristic.SecuritySystemCurrentState)
-			.on('get', function(next) {
-				var me = this;
-				var status_report = shell.exec(path_to_login_script);
-				if (status_report.includes('dis')) {
-					status_actual = Characteristic.SecuritySystemCurrentState.DISARMED;
-				} else {
-					status_actual = Characteristic.SecuritySystemCurrentState.AWAY_ARMED;
+		var alarmStatus = readStatus();
+		var alarmService;
+		if (Type == "Sensor") {
+			alarmService = new Service.OccupancySensor("Alarm");
+			fs.watchFile('/tmp/alarmStatus', (curr, prev) => {
+				if (alarmStatus != readStatus())
+				{
+					logger.info("Alarm status changed!");
+					alarmService.getCharacteristic(Characteristic.OccupancyDetected).updateValue(readStatus());
 				}
-				return next(null, status_actual);
-			});
-		alarmService
-			.getCharacteristic(Characteristic.SecuritySystemTargetState)
-			.on('get', function(next) {
-				var me = this;
-				var status_report = shell.exec(path_to_login_script);
-				if (status_report.includes('dis')) {
-					status_actual = Characteristic.SecuritySystemCurrentState.DISARMED;
-				} else {
-					status_actual = Characteristic.SecuritySystemCurrentState.AWAY_ARMED;
-				}
-				return next(null, status_actual);
-			})
-			.on('set', function(powerState, next) {
-				// alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(status_actual);
-				alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(status_actual);
-
-				return next(new Error("Setting alarm state isn't supported!"));
 			});
 
+			alarmService.getCharacteristic(Characteristic.OccupancyDetected)
+				.on('get', function (next) {
+					alarmStatus = readStatus();
+					return next(null, alarmStatus);
+				});
+		}
+		else if (Type == "Switch") {
+			alarmService = new Service.Switch("Alarm");
+			fs.watchFile('/tmp/alarmStatus', (curr, prev) => {
+				if (alarmStatus != readStatus())
+				{
+					logger.info("Alarm status changed!");
+					alarmService.getCharacteristic(Characteristic.On).updateValue(readStatus());
+				}
+			});
+
+			alarmService.getCharacteristic(Characteristic.On)
+				.on('get', function (next) {
+					alarmStatus = readStatus();
+					return next(null, alarmStatus);
+				})
+				.on('set', function (wantedState, next) {
+					alarmStatus = readStatus();
+					if (wantedState != alarmStatus)
+					{
+						alarmService.getCharacteristic(Characteristic.On).updateValue(alarmStatus);
+						logger.error("Setting alarm status isn't supported!");
+						return next(new Error("Setting alarm status isn't supported!"));
+					}
+					return next();
+				});
+		}
+		else if (Type == "Alarm") {
+			alarmService = new Service.SecuritySystem("Alarm");
+			fs.watchFile('/tmp/alarmStatus', (curr, prev) => {
+				if (alarmStatus != readStatus())
+				{
+					logger.info("Alarm status changed!");
+					alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(readStatus());
+					alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(readStatus());
+				}
+			});
+
+			alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState)
+				.on('get', function (next) {
+					alarmStatus = readStatus();
+					return next(null, alarmStatus);
+				});
+			alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState)
+				.on('get', function (next)
+				{
+					alarmStatus = readStatus();
+					return next(null, alarmStatus);
+				})
+				.on('set', function (wantedState, next) {
+					alarmStatus = readStatus();
+					if (wantedState != alarmStatus)
+					{
+						alarmService.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(alarmStatus);
+						alarmService.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(alarmStatus);
+						logger.error("Setting alarm status isn't supported!");
+						return next(new Error("Setting alarm status isn't supported!"));
+					}
+					return next();
+				});
+		}
 		this.informationService = informationService;
 		this.alarmService = alarmService;
 		return [informationService, alarmService];
 	}
 };
-

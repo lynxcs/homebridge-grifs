@@ -24,16 +24,12 @@ $ sudo npm -g i homebridge-grifs
     {
         "accessory": "GRIFHomeAlarm",
         "name": "Home Alarm",
-        "path": "/usr/local/lib/node_modules/homebridge-grifs/grif_login"
+        "type": "Alarm",
+        "email": "email@example.com",
+        "password": "password
     }
 ]
 ```
-where `name` is the alarm name and `path` is the path to the grif_login script (which, if installed by npm -g, should be the same as the example)
-- Modify the variables in grif_status (EMAIL and PASSWORD)
-- Add grif_status to crontab (or equivalent), as this updates the alarm status in the background, e.g:
-```
-$ sudo crontab -e
-*/3 * * * * /usr/local/lib/node_modules/homebridge-grifs/grif_status
-```
+where `name` is the alarm name; `type` is "Alarm" (Security System), "Switch" (Switch) or "Sensor" (Occupancy Sensor); `email` is email address of the Grifs website account; `password` is the password of the account.
 #### Getting help
 If you need help troubleshooting, create an issue and I'll try to help you fix it.
